@@ -1,0 +1,347 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   Chinese Handwritten Font Support (Stable)
+   Strategy: CSS-based override ensuring ZCOOL KuaiLe takes precedence
+   for Virgil font family, backed by specificity.
+   ======================================== */
+
+/* Load ZCOOL KuaiLe */
+@font-face {
+  font-family: 'ZCOOL KuaiLe';
+  src: url('https://fonts.gstatic.com/s/zcoolkuaile/v19/tssqApdaRQokwFjFJjvM6h2Wpg.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block; /* Important: wait for font to ensure no layout shift or fallback flicker */
+}
+
+/* 
+  CRITICAL: Override Excalidraw's internal "Virgil" font definition.
+  We redefine "Virgil" to use our Chinese font file. 
+  This tricks Excalidraw into rendering Chinese characters with the hand-drawn style
+  while keeping its internal logic references to "Virgil" intact.
+*/
+@font-face {
+  font-family: 'Virgil';
+  src: url('https://fonts.gstatic.com/s/zcoolkuaile/v19/tssqApdaRQokwFjFJjvM6h2Wpg.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+/* Force override for inputs and textareas */
+.excalidraw textarea,
+.excalidraw input,
+.excalidraw .virgil {
+  font-family: 'ZCOOL KuaiLe', 'Virgil', cursive !important;
+}
+
+/* ========================================
+   Apple-Style Design System Variables
+   ======================================== */
+:root {
+  /* Metrics */
+  --header-height: 60px;
+  --apple-radius: 18px; /* Smooth squircle-like radius */
+  
+  /* Fonts */
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  
+  /* Light Mode Colors (macOS Big Sur+) */
+  --bg-primary-light: rgba(255, 255, 255, 0.85); /* For glassmorphism */
+  --bg-secondary-light: rgba(245, 245, 247, 0.6);
+  --text-primary-light: #1d1d1f;
+  --text-secondary-light: #86868b;
+  --accent-light: #0071e3;
+  --border-light: rgba(0, 0, 0, 0.05);
+  
+  /* Dark Mode Colors */
+  --bg-primary-dark: rgba(30, 30, 30, 0.75);
+  --bg-secondary-dark: rgba(44, 44, 46, 0.6);
+  --text-primary-dark: #f5f5f7;
+  --text-secondary-dark: #86868b;
+  --accent-dark: #2997ff;
+  --border-dark: rgba(255, 255, 255, 0.08);
+}
+
+/* Excalidraw App Styles */
+.excalidraw-app {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden; /* Prevent body scroll, handle internal scrolling */
+  font-family: var(--font-system);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Light Theme (Default) */
+.excalidraw-app,
+.excalidraw-app[data-theme="light"] {
+  --bg-app: #f5f5f7; /* Apple system gray 6 */
+  --bg-card: #ffffff;
+  --text-main: var(--text-primary-light);
+  --text-dim: var(--text-secondary-light);
+  --border-color: var(--border-light);
+  --accent: var(--accent-light);
+  
+  background-color: var(--bg-app);
+  color: var(--text-main);
+}
+
+/* Dark Theme */
+.excalidraw-app.dark,
+.excalidraw-app[data-theme="dark"] {
+  --bg-app: #000000; /* Apple pure black or very dark gray */
+  --bg-card: #1c1c1e; /* Apple system gray 6 dark */
+  --text-main: var(--text-primary-dark);
+  --text-dim: var(--text-secondary-dark);
+  --border-color: var(--border-dark);
+  --accent: var(--accent-dark);
+  
+  background-color: var(--bg-app);
+  color: var(--text-main);
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+/* Excalidraw overrides */
+.excalidraw .App-menu_top {
+  z-index: 10;
+}
+
+/* Move Excalidraw's toolbar down to avoid overlap */
+.excalidraw .App-toolbar-container {
+  margin-top: 8px;
+}
+
+/* Also adjust the library button */
+.excalidraw .layer-ui__wrapper__top-right {
+  top: 8px !important;
+}
+
+.excalidraw-editor-container {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Ensure header stays on top but doesn't block Excalidraw interactions */
+.excalidraw-editor-container > header {
+  position: relative;
+  z-index: 100 !important;
+  flex-shrink: 0;
+}
+
+/* Excalidraw canvas container - critical for property panels */
+.excalidraw-editor-container > .flex-1 {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Excalidraw component itself */
+.excalidraw-editor-container .excalidraw {
+  position: absolute;
+  inset: 0;
+}
+
+/* CRITICAL: Ensure all Excalidraw UI layers work properly */
+.excalidraw .layer-ui__wrapper {
+  pointer-events: none;
+}
+
+.excalidraw .layer-ui__wrapper > * {
+  pointer-events: auto;
+}
+
+/* Ensure Excalidraw's popover and panels are visible and clickable */
+.excalidraw .popover,
+.excalidraw .dropdown-menu,
+.excalidraw .App-menu,
+.excalidraw .context-menu {
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+}
+
+/* Properties panel / Selected element actions - CRITICAL */
+.excalidraw .App-menu_bottom,
+.excalidraw .App-bottom-bar,
+.excalidraw .selected-shape-actions,
+.excalidraw .shapes-actions-container,
+.excalidraw .panelColumn,
+.excalidraw [class*="selectedShapeActions"],
+.excalidraw [class*="ShapesSwitcher"] {
+  z-index: 100 !important;
+  pointer-events: auto !important;
+}
+
+/* The Island components (toolbars, panels) */
+.excalidraw .Island {
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+
+/* Color picker and other popup panels */
+.excalidraw .color-picker,
+.excalidraw .color-picker-content,
+.excalidraw .color-picker-container,
+.excalidraw .ColorPicker,
+.excalidraw [class*="ColorPicker"],
+.excalidraw [class*="Popover"],
+.excalidraw [class*="popover"] {
+  z-index: 1001 !important;
+  pointer-events: auto !important;
+}
+
+/* Font family and size selectors */
+.excalidraw .dropdown-select,
+.excalidraw .dropdown-select__container,
+.excalidraw [class*="dropdown"],
+.excalidraw [class*="Dropdown"] {
+  z-index: 1001 !important;
+  pointer-events: auto !important;
+}
+
+/* Canvas itself should capture pointer events */
+.excalidraw .excalidraw__canvas {
+  pointer-events: auto !important;
+}
+
+/* Element action toolbar (appears when element selected) */
+.excalidraw .style-actions,
+.excalidraw .Actions,
+.excalidraw [class*="Actions"] {
+  pointer-events: auto !important;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Inline renderer styles */
+.excalidraw-inline-renderer {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--ls-tertiary-background-color, #f5f5f5);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.excalidraw-inline-renderer:hover {
+  background: var(--ls-secondary-background-color, #e5e5e5);
+}
+
+.excalidraw-preview-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ls-primary-text-color, #333);
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}
+
+/* Excalidraw container styles */
+.excalidraw-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.excalidraw-container {
+  position: relative;
+  line-height: 0;
+}
+
+.excalidraw-container:hover .excalidraw-toolbar-container {
+  opacity: 1;
+}
+
+.excalidraw-toolbar-container {
+  display: flex;
+  justify-content: space-between;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 10px 6px;
+  background-image: linear-gradient(var(--ls-primary-background-color, #fff), transparent);
+}
+
+.excalidraw-title {
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.excalidraw-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.excalidraw-toolbar a {
+  width: 18px;
+  height: 18px;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.excalidraw-svg {
+  max-width: 100%;
+  min-width: 100px;
+  height: auto;
+}
