@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,7 +16,8 @@
   src: url('https://fonts.gstatic.com/s/zcoolkuaile/v19/tssqApdaRQokwFjFJjvM6h2Wpg.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
-  font-display: block; /* Important: wait for font to ensure no layout shift or fallback flicker */
+  font-display: block;
+  /* Important: wait for font to ensure no layout shift or fallback flicker */
 }
 
 /* 
@@ -25,10 +28,17 @@
 */
 @font-face {
   font-family: 'Virgil';
-  src: url('https://fonts.gstatic.com/s/zcoolkuaile/v19/tssqApdaRQokwFjFJjvM6h2Wpg.woff2') format('woff2');
+  /* Use Ma Shan Zheng for handwriting style */
+  src: url('https://fonts.gstatic.com/s/mashanzheng/v11/L0xSDF02iNQ7H8L3hV_dfL67_6p00Hw.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: block;
+}
+
+/* Force override for Virgil font to support Chinese characters */
+.excalidraw .virgil,
+.excalidraw [style*="Virgil"] {
+  font-family: 'Virgil', 'Ma Shan Zheng', cursive !important;
 }
 
 /* Force override for inputs and textareas */
@@ -44,19 +54,21 @@
 :root {
   /* Metrics */
   --header-height: 60px;
-  --apple-radius: 18px; /* Smooth squircle-like radius */
-  
+  --apple-radius: 18px;
+  /* Smooth squircle-like radius */
+
   /* Fonts */
   --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  
+
   /* Light Mode Colors (macOS Big Sur+) */
-  --bg-primary-light: rgba(255, 255, 255, 0.85); /* For glassmorphism */
+  --bg-primary-light: rgba(255, 255, 255, 0.85);
+  /* For glassmorphism */
   --bg-secondary-light: rgba(245, 245, 247, 0.6);
   --text-primary-light: #1d1d1f;
   --text-secondary-light: #86868b;
   --accent-light: #0071e3;
   --border-light: rgba(0, 0, 0, 0.05);
-  
+
   /* Dark Mode Colors */
   --bg-primary-dark: rgba(30, 30, 30, 0.75);
   --bg-secondary-dark: rgba(44, 44, 46, 0.6);
@@ -70,7 +82,8 @@
 .excalidraw-app {
   width: 100%;
   height: 100vh;
-  overflow: hidden; /* Prevent body scroll, handle internal scrolling */
+  overflow: hidden;
+  /* Prevent body scroll, handle internal scrolling */
   font-family: var(--font-system);
   -webkit-font-smoothing: antialiased;
 }
@@ -78,13 +91,14 @@
 /* Light Theme (Default) */
 .excalidraw-app,
 .excalidraw-app[data-theme="light"] {
-  --bg-app: #f5f5f7; /* Apple system gray 6 */
+  --bg-app: #f5f5f7;
+  /* Apple system gray 6 */
   --bg-card: #ffffff;
   --text-main: var(--text-primary-light);
   --text-dim: var(--text-secondary-light);
   --border-color: var(--border-light);
   --accent: var(--accent-light);
-  
+
   background-color: var(--bg-app);
   color: var(--text-main);
 }
@@ -92,13 +106,15 @@
 /* Dark Theme */
 .excalidraw-app.dark,
 .excalidraw-app[data-theme="dark"] {
-  --bg-app: #000000; /* Apple pure black or very dark gray */
-  --bg-card: #1c1c1e; /* Apple system gray 6 dark */
+  --bg-app: #000000;
+  /* Apple pure black or very dark gray */
+  --bg-card: #1c1c1e;
+  /* Apple system gray 6 dark */
   --text-main: var(--text-primary-dark);
   --text-dim: var(--text-secondary-dark);
   --border-color: var(--border-dark);
   --accent: var(--accent-dark);
-  
+
   background-color: var(--bg-app);
   color: var(--text-main);
 }
@@ -129,14 +145,14 @@
 }
 
 /* Ensure header stays on top but doesn't block Excalidraw interactions */
-.excalidraw-editor-container > header {
+.excalidraw-editor-container>header {
   position: relative;
   z-index: 100 !important;
   flex-shrink: 0;
 }
 
 /* Excalidraw canvas container - critical for property panels */
-.excalidraw-editor-container > .flex-1 {
+.excalidraw-editor-container>.flex-1 {
   position: relative;
   overflow: visible !important;
 }
@@ -152,7 +168,7 @@
   pointer-events: none;
 }
 
-.excalidraw .layer-ui__wrapper > * {
+.excalidraw .layer-ui__wrapper>* {
   pointer-events: auto;
 }
 
@@ -160,9 +176,30 @@
 .excalidraw .popover,
 .excalidraw .dropdown-menu,
 .excalidraw .App-menu,
-.excalidraw .context-menu {
-  z-index: 1000 !important;
+.excalidraw .context-menu,
+.excalidraw .context-menu-container {
+  z-index: 10000 !important;
+  /* Higher z-index for context menu */
   pointer-events: auto !important;
+  color: var(--text-main) !important;
+  /* Ensure visibility */
+  background-color: var(--bg-card) !important;
+}
+
+/* Fix context menu text overlap/visibility */
+.excalidraw .context-menu button {
+  white-space: nowrap !important;
+  line-height: normal !important;
+  height: auto !important;
+  padding: 8px 12px !important;
+  color: inherit !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.excalidraw .context-menu .context-menu-item__label {
+  margin-right: 16px !important;
 }
 
 /* Properties panel / Selected element actions - CRITICAL */
@@ -241,6 +278,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

@@ -4,7 +4,7 @@ import type { AppState, BinaryFiles } from '@excalidraw/excalidraw/types/types'
 export interface ExcalidrawData {
   elements: readonly ExcalidrawElement[]
   appState?: Partial<AppState>
-  files: BinaryFiles | null
+  files?: BinaryFiles
 }
 
 export interface Drawing {
@@ -25,4 +25,23 @@ export interface RenderAppProps {
   mode: AppMode
   drawingId?: string
   slotId?: string
+}
+
+export interface DashboardProps {
+  drawings: Drawing[]
+  onOpen: (id: string) => void
+  onCreate: (name: string, tags?: string[]) => Promise<Drawing | null>
+  onUpdate: (id: string, updates: { name?: string; tags?: string[] }) => Promise<Drawing | null>
+  onDelete: (id: string) => Promise<boolean>
+  onClose: () => void
+}
+
+export interface ExcalidrawEditorProps {
+  drawing: Drawing
+  mode: 'edit' | 'preview'
+  theme: Theme
+  onSave: (drawing: Drawing) => Promise<Drawing | null>
+  onBack: () => void
+  onModeChange: (mode: AppMode) => void
+  onClose: () => void
 }

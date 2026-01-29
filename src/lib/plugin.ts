@@ -122,7 +122,7 @@ export async function updateDrawingCommands() {
         logseq.App.registerCommandPalette(
           {
             key: commandKey,
-            label: `Excalidraw: 打开「${drawingName}」${drawing.tags?.length ? ` ${drawing.tags.map(t => '#' + t).join(' ')}` : ''}`,
+            label: `Excalidraw: Open "${drawingName}"${drawing.tags?.length ? ` ${drawing.tags.map(t => '#' + t).join(' ')}` : ''}`,
           },
           // Use a simple function, not async, to avoid potential issues
           () => {
@@ -324,11 +324,11 @@ export async function copyDrawingReference(drawingId: string, drawingName: strin
   try {
     const macro = getDrawingRendererMacro(drawingId, drawingName)
     await navigator.clipboard.writeText(macro)
-    logseq.UI.showMsg(`已复制「${drawingName}」引用到剪贴板`, 'success')
+    logseq.UI.showMsg(`Copied reference for "${drawingName}"`, 'success')
     return true
   } catch (error) {
     logger.error('Failed to copy reference:', error)
-    logseq.UI.showMsg('复制失败', 'error')
+    logseq.UI.showMsg('Copy failed', 'error')
     return false
   }
 }
@@ -339,7 +339,7 @@ export async function copyDrawingReference(drawingId: string, drawingName: strin
 export async function insertDrawingToLastPage(drawingId: string, drawingName: string): Promise<boolean> {
   try {
     if (!lastVisitedPageUuid) {
-      logseq.UI.showMsg('没有找到上次访问的页面，请复制引用后手动粘贴', 'warning')
+      logseq.UI.showMsg('No recent page found. Please copy reference and paste manually.', 'warning')
       return false
     }
 
@@ -349,11 +349,11 @@ export async function insertDrawingToLastPage(drawingId: string, drawingName: st
       macro,
       { sibling: false }
     )
-    logseq.UI.showMsg(`已插入「${drawingName}」到页面「${lastVisitedPageName}」`, 'success')
+    logseq.UI.showMsg(`Inserted "${drawingName}" into page "${lastVisitedPageName}"`, 'success')
     return true
   } catch (error) {
     logger.error('Failed to insert drawing:', error)
-    logseq.UI.showMsg('插入失败', 'error')
+    logseq.UI.showMsg('Insertion failed', 'error')
     return false
   }
 }
@@ -374,10 +374,10 @@ export async function insertDrawingToBlock(drawingId: string, drawingName: strin
           macro,
           { sibling: false }
         )
-        logseq.UI.showMsg(`已插入画布「${drawingName}」`, 'success')
+        logseq.UI.showMsg(`Inserted drawing "${drawingName}"`, 'success')
         return true
       }
-      logseq.UI.showMsg('请先选择一个 block', 'warning')
+      logseq.UI.showMsg('Please select a block first', 'warning')
       return false
     }
 
@@ -387,11 +387,11 @@ export async function insertDrawingToBlock(drawingId: string, drawingName: strin
       macro,
       { sibling: true }
     )
-    logseq.UI.showMsg(`已插入画布「${drawingName}」`, 'success')
+    logseq.UI.showMsg(`Inserted drawing "${drawingName}"`, 'success')
     return true
   } catch (error) {
     logger.error('Failed to insert drawing:', error)
-    logseq.UI.showMsg('插入失败', 'error')
+    logseq.UI.showMsg('Insertion failed', 'error')
     return false
   }
 }
@@ -438,7 +438,7 @@ export async function insertDrawingToToday(drawingId: string, drawingName: strin
         macro,
         { sibling: false } // Insert as last block
       )
-      logseq.UI.showMsg(`已插入「${drawingName}」到今日日记`, 'success')
+      logseq.UI.showMsg(`Inserted "${drawingName}" into Today's Journal`, 'success')
       return true
     }
 
@@ -446,7 +446,7 @@ export async function insertDrawingToToday(drawingId: string, drawingName: strin
 
   } catch (error) {
     logger.error('Failed to insert to today:', error)
-    logseq.UI.showMsg('插入失败', 'error')
+    logseq.UI.showMsg('Insertion failed', 'error')
     return false
   }
 }

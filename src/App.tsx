@@ -4,7 +4,7 @@ import { Dashboard } from './components/Dashboard'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useLogseq } from './hooks/useLogseq'
 import { useTheme } from './hooks/useTheme'
-import { refreshSearchIndex, updateDrawingCommands } from './lib/plugin'
+import { refreshSearchIndex, updateDrawingCommands, rememberCurrentPage } from './lib/plugin'
 import { logger } from './lib/logger'
 import type { RenderAppProps, Drawing, AppMode } from './types'
 
@@ -48,6 +48,7 @@ export default function App({ mode: initialMode, drawingId }: AppProps) {
   }, [drawingId, loadDrawing])
 
   const handleCreateDrawing = useCallback(async (name: string, tags?: string[]) => {
+    await rememberCurrentPage()
     const drawing = await createDrawing(name, tags?.[0])
     if (drawing) {
       setDrawings((prev) => [drawing, ...prev])
@@ -58,6 +59,7 @@ export default function App({ mode: initialMode, drawingId }: AppProps) {
   }, [createDrawing])
 
   const handleOpenDrawing = useCallback(async (id: string) => {
+    await rememberCurrentPage()
     const drawing = await loadDrawing(id)
     if (drawing) {
       setCurrentDrawing(drawing)
@@ -113,23 +115,16 @@ export default function App({ mode: initialMode, drawingId }: AppProps) {
     logger.debug('handleClose called')
 
     try {
-      // First, try to get current page to navigate back
-      const currentPage = await logseq.Editor.getCurrentPage()
-      logger.debug('Current page:', currentPage?.name || 'none')
-
       // Hide the main UI
-      logseq.hideMainUI({ restoreEditingCursor: true })
-      logger.debug('hideMainUI called')
+      logseq.hideMainUI()
 
-      // If we were on a page, try to refresh it
+      // Fallback: reload page if needed
+      const currentPage = await logseq.Editor.getCurrentPage()
       if (currentPage?.name) {
-        setTimeout(() => {
-          logseq.App.pushState('page', { name: currentPage.name })
-        }, 100)
+        logseq.App.pushState('page', { name: currentPage.name })
       }
     } catch (e) {
       logger.error('handleClose error:', e)
-      // Fallback: just hide
       logseq.hideMainUI()
     }
   }, [])
@@ -141,7 +136,7 @@ export default function App({ mode: initialMode, drawingId }: AppProps) {
           <div className="h-screen flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>加载中...</p>
+              <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>Loading drawings...</p>
             </div>
           </div>
         ) : mode === 'dashboard' ? (

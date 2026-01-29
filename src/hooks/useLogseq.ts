@@ -111,7 +111,7 @@ export function useLogseq() {
         id,
         name,
         tags: tag ? [tag] : [],
-        data: { elements: [], files: null },
+        data: { elements: [], files: undefined },
         createdAt: now,
         updatedAt: now,
       }

@@ -37,7 +37,7 @@ export function getCurrentTimestamp(): number {
 }
 
 export function formatDate(timestamp: number): string {
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -58,13 +58,13 @@ export function formatRelativeTime(timestamp: number): string {
   if (days > 7) {
     return formatDate(timestamp)
   } else if (days > 0) {
-    return `${days}天前`
+    return `${days}d ago`
   } else if (hours > 0) {
-    return `${hours}小时前`
+    return `${hours}h ago`
   } else if (minutes > 0) {
-    return `${minutes}分钟前`
+    return `${minutes}m ago`
   } else {
-    return '刚刚'
+    return 'Just now'
   }
 }
 

@@ -300,14 +300,31 @@ export function useExcalidraw({
     }
   }, [])
 
+  const downloadImage = useCallback(async (filename: string = 'drawing') => {
+    const blob = await exportToPNG()
+    if (!blob) return
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${filename}.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }, [exportToPNG])
+
   return {
     isDirty,
     isSaving,
     lastSaved,
-    setExcalidrawAPI,
+    setExcalidrawAPI, // This can be used as the ref prop for <Excalidraw />
+    excalidrawAPI: excalidrawAPIRef.current,
     handleChange,
     saveNow,
     exportToSVG,
     exportToPNG,
+    exportToImage: exportToPNG,
+    downloadImage,
   }
 }
