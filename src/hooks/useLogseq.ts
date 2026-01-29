@@ -110,7 +110,7 @@ export function useLogseq() {
       const drawing: Drawing = {
         id,
         name,
-        tag: tag || 'default',
+        tags: tag ? [tag] : [],
         data: { elements: [], files: null },
         createdAt: now,
         updatedAt: now,
@@ -159,7 +159,7 @@ export function useLogseq() {
    */
   const updateDrawingMeta = useCallback(async (
     id: string,
-    updates: { name?: string; tag?: string }
+    updates: { name?: string; tags?: string[] }
   ): Promise<Drawing | null> => {
     try {
       const storage = getStorage()
@@ -174,7 +174,7 @@ export function useLogseq() {
       const updatedDrawing: Drawing = {
         ...drawing,
         name: updates.name ?? drawing.name,
-        tag: updates.tag ?? drawing.tag,
+        tags: updates.tags ?? drawing.tags,
         updatedAt: getCurrentTimestamp(),
       }
 

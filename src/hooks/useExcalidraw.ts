@@ -7,12 +7,14 @@ interface UseExcalidrawOptions {
   drawing: Drawing
   onSave?: (drawing: Drawing) => Promise<Drawing | null>
   autoSaveInterval?: number
+  tagsRef?: React.RefObject<string[]>  // Optional ref for dynamic tags
 }
 
 export function useExcalidraw({
   drawing,
   onSave,
   autoSaveInterval = 5000,
+  tagsRef,
 }: UseExcalidrawOptions) {
   const [isDirty, setIsDirty] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -130,6 +132,8 @@ export function useExcalidraw({
                 ...drawingRef.current,
                 data,
                 thumbnail: thumbnail || undefined,
+                // Include updated tags if provided
+                ...(tagsRef?.current ? { tags: tagsRef.current } : {}),
               })
 
               if (!isMountedRef.current) return
@@ -187,6 +191,8 @@ export function useExcalidraw({
         ...drawingRef.current,
         data,
         thumbnail: thumbnail || undefined,
+        // Include updated tags if provided
+        ...(tagsRef?.current ? { tags: tagsRef.current } : {}),
       })
       logger.debug('saveNow: save result', !!result)
       if (result) {

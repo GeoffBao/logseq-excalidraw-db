@@ -10,16 +10,31 @@ const CHINESE_FONT_URL = 'https://fonts.gstatic.com/s/zcoolkuaile/v19/tssqApdaRQ
 
 async function preloadChineseFonts() {
   try {
-    const zcoolFont = new FontFace('ZCOOL KuaiLe', `url(${CHINESE_FONT_URL})`)
+    const fontUrl = `url(${CHINESE_FONT_URL})`
+
+    // 1. Load as its original name
+    const zcoolFont = new FontFace('ZCOOL KuaiLe', fontUrl)
     await zcoolFont.load()
     document.fonts.add(zcoolFont)
-    logger.debug('Chinese font preloaded successfully')
+
+    // 2. CRITICAL: Load as "Virgil" to force Canvas to use it for Chinese characters
+    // This allows the browser to merge both "Virgil" definitions (Excalidraw's + ours)
+    // or at least ensures this font is available under the name Excalidraw requests.
+    // We specify unicode range to avoid overriding English Virgil if possible, 
+    // though for the JS API, simpler is often better.
+    const virgilChinese = new FontFace('Virgil', fontUrl, {
+      unicodeRange: 'U+4E00-9FFF, U+3000-303F, U+FF00-FFEF'
+    })
+    await virgilChinese.load()
+    document.fonts.add(virgilChinese)
+
+    logger.debug('Chinese font preloaded and registered as Virgil successfully')
   } catch (e) {
-    logger.warn('Failed to preload Chinese font (CSS fallback will manage):', e)
+    logger.warn('Failed to preload Chinese font:', e)
   }
 }
 
-// Start preloading
+// Start preloading immediately
 preloadChineseFonts()
 
 import React from 'react'
@@ -222,12 +237,13 @@ async function main() {
   })
 
   // Listen for visibility changes
-  logseq.on('ui:visible:changed', ({ visible }) => {
+  // Listen for visibility changes
+  logseq.on('ui:visible:changed', ({ visible }: { visible: boolean }) => {
     logger.debug('UI visibility changed:', visible)
   })
 
   // Listen for settings changes
-  logseq.onSettingsChanged((newSettings) => {
+  logseq.onSettingsChanged((newSettings: any) => {
     logger.debug('Settings changed:', newSettings)
   })
 

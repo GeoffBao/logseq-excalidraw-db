@@ -10,7 +10,7 @@ export interface ExcalidrawData {
 export interface Drawing {
   id: string           // page uuid
   name: string         // page name
-  tag?: string         // category tag
+  tags?: string[]      // category tags for search
   data: ExcalidrawData
   thumbnail?: string   // SVG data URL for preview
   createdAt: number

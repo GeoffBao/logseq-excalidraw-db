@@ -64,7 +64,7 @@ export function useTheme() {
     getTheme()
 
     // Listen for theme changes from Logseq
-    const unsubscribe = logseq.App.onThemeModeChanged(({ mode }) => {
+    const unsubscribe = logseq.App.onThemeModeChanged(({ mode }: { mode: 'dark' | 'light' }) => {
       logger.debug('Theme changed:', mode)
       setTheme(mode === 'dark' ? 'dark' : 'light')
     })

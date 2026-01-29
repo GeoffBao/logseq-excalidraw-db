@@ -47,8 +47,8 @@ export default function App({ mode: initialMode, drawingId }: AppProps) {
     }
   }, [drawingId, loadDrawing])
 
-  const handleCreateDrawing = useCallback(async (name: string, tag?: string) => {
-    const drawing = await createDrawing(name, tag)
+  const handleCreateDrawing = useCallback(async (name: string, tags?: string[]) => {
+    const drawing = await createDrawing(name, tags?.[0])
     if (drawing) {
       setDrawings((prev) => [drawing, ...prev])
       setCurrentDrawing(drawing)
@@ -76,7 +76,7 @@ export default function App({ mode: initialMode, drawingId }: AppProps) {
     return saved
   }, [saveDrawing])
 
-  const handleUpdateDrawing = useCallback(async (id: string, updates: { name?: string; tag?: string }) => {
+  const handleUpdateDrawing = useCallback(async (id: string, updates: { name?: string; tags?: string[] }) => {
     const updated = await updateDrawingMeta(id, updates)
     if (updated) {
       setDrawings((prev) =>

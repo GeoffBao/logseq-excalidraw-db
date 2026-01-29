@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react'
 import { cn, formatRelativeTime } from '../lib/utils'
-// import { useTheme } from '../hooks/useTheme'
+
 import { copyDrawingReference } from '../lib/plugin'
 import type { Drawing } from '../types'
 
 interface DashboardProps {
   drawings: Drawing[]
   onOpen: (id: string) => void
-  onCreate: (name: string, tag?: string) => Promise<Drawing | null>
-  onUpdate: (id: string, updates: { name?: string; tag?: string }) => Promise<Drawing | null>
+  onCreate: (name: string, tags?: string[]) => Promise<Drawing | null>
+  onUpdate: (id: string, updates: { name?: string; tags?: string[] }) => Promise<Drawing | null>
   onDelete: (id: string) => Promise<boolean>
   onClose: () => void
 }
@@ -22,20 +22,33 @@ export function Dashboard({ drawings, onOpen, onCreate, onUpdate, onDelete, onCl
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editTag, setEditTag] = useState('')
+  const [editingTagsId, setEditingTagsId] = useState<string | null>(null)
+  const [inlineTagInput, setInlineTagInput] = useState('')
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)  // Tag filter
 
-  // Filter drawings
+  // Extract all unique tags from drawings
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>()
+    drawings.forEach(d => d.tags?.forEach(t => tagSet.add(t)))
+    return Array.from(tagSet).sort()
+  }, [drawings])
+
+  // Filter drawings by search query and selected tag
   const filteredDrawings = useMemo(() => {
     return drawings.filter((d) => {
+      // Tag filter
+      if (selectedTag && !d.tags?.includes(selectedTag)) return false
+      // Search filter
       return !searchQuery ||
         d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.tag?.toLowerCase().includes(searchQuery.toLowerCase())
+        d.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
     })
-  }, [drawings, searchQuery])
+  }, [drawings, searchQuery, selectedTag])
 
   const handleCreate = async () => {
     if (!newDrawingName.trim()) return
 
-    const drawing = await onCreate(newDrawingName.trim(), newDrawingTag || undefined)
+    const drawing = await onCreate(newDrawingName.trim(), newDrawingTag ? [newDrawingTag] : undefined)
     if (drawing) {
       setIsCreating(false)
       setNewDrawingName('')
@@ -47,7 +60,7 @@ export function Dashboard({ drawings, onOpen, onCreate, onUpdate, onDelete, onCl
     e.stopPropagation()
     setEditingId(drawing.id)
     setEditName(drawing.name)
-    setEditTag(drawing.tag || '')
+    setEditTag(drawing.tags?.join(', ') || '')
   }
 
   const handleSaveEdit = async () => {
@@ -55,7 +68,7 @@ export function Dashboard({ drawings, onOpen, onCreate, onUpdate, onDelete, onCl
 
     await onUpdate(editingId, {
       name: editName.trim(),
-      tag: editTag.trim() || undefined
+      tags: editTag.trim() ? editTag.split(',').map(t => t.trim()).filter(Boolean) : undefined
     })
     setEditingId(null)
   }
@@ -171,6 +184,35 @@ export function Dashboard({ drawings, onOpen, onCreate, onUpdate, onDelete, onCl
               )}
             </div>
           </div>
+
+          {/* Tag Filter Bar */}
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap mt-4">
+              <span className="text-[13px] text-[var(--text-dim)] mr-1">标签筛选:</span>
+              {selectedTag && (
+                <button
+                  onClick={() => setSelectedTag(null)}
+                  className="px-2 py-0.5 rounded-full text-[12px] font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  全部 ×
+                </button>
+              )}
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                  className={cn(
+                    "px-2.5 py-0.5 rounded-full text-[12px] font-medium transition-all duration-200",
+                    selectedTag === tag
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+                  )}
+                >
+                  #{tag}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
@@ -335,11 +377,76 @@ export function Dashboard({ drawings, onOpen, onCreate, onUpdate, onDelete, onCl
                           <h3 className="font-semibold text-[17px] text-[var(--text-main)] truncate leading-tight group-hover:text-[var(--accent)] transition-colors">
                             {drawing.name}
                           </h3>
-                          {drawing.tag && (
-                            <span className="shrink-0 px-2.5 py-1 rounded-md text-[11px] font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50">
-                              {drawing.tag}
-                            </span>
-                          )}
+                          {/* Clickable tags area for inline editing */}
+                          <div
+                            className="relative"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditingTagsId(editingTagsId === drawing.id ? null : drawing.id)
+                              setInlineTagInput('')
+                            }}
+                          >
+                            {drawing.tags && drawing.tags.length > 0 ? (
+                              <div className="flex gap-1 flex-wrap cursor-pointer hover:opacity-80">
+                                {drawing.tags.slice(0, 2).map((tag, i) => (
+                                  <span key={i} className="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                                    #{tag}
+                                  </span>
+                                ))}
+                                {drawing.tags.length > 2 && (
+                                  <span className="text-[11px] text-gray-400">+{drawing.tags.length - 2}</span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-[11px] text-gray-400 hover:text-blue-500 cursor-pointer">+ 标签</span>
+                            )}
+
+                            {/* Inline Tag Editor Popup */}
+                            {editingTagsId === drawing.id && (
+                              <div
+                                className="absolute left-0 top-full mt-1 p-2 rounded-lg shadow-lg z-50 w-52 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="flex flex-wrap gap-1 mb-2">
+                                  {(drawing.tags || []).map((tag, i) => (
+                                    <span key={i} className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                                      #{tag}
+                                      <button
+                                        onClick={async (e) => {
+                                          e.stopPropagation()
+                                          const newTags = drawing.tags?.filter((_, idx) => idx !== i)
+                                          await onUpdate(drawing.id, { tags: newTags })
+                                        }}
+                                        className="hover:text-red-500"
+                                      >×</button>
+                                    </span>
+                                  ))}
+                                </div>
+                                <input
+                                  type="text"
+                                  value={inlineTagInput}
+                                  onChange={(e) => setInlineTagInput(e.target.value)}
+                                  onKeyDown={async (e) => {
+                                    if (e.key === 'Enter' && inlineTagInput.trim()) {
+                                      e.stopPropagation()
+                                      const newTag = inlineTagInput.trim().replace(/^#/, '')
+                                      const currentT = drawing.tags || []
+                                      if (!currentT.includes(newTag)) {
+                                        await onUpdate(drawing.id, { tags: [...currentT, newTag] })
+                                      }
+                                      setInlineTagInput('')
+                                      setEditingTagsId(null)
+                                    } else if (e.key === 'Escape') {
+                                      setEditingTagsId(null)
+                                    }
+                                  }}
+                                  placeholder="回车添加标签"
+                                  className="w-full px-2 py-1 text-[11px] rounded border bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
+                                  autoFocus
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         <div className="mt-auto flex items-center justify-between">

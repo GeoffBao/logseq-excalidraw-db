@@ -122,7 +122,7 @@ export async function updateDrawingCommands() {
         logseq.App.registerCommandPalette(
           {
             key: commandKey,
-            label: `Excalidraw: 打开「${drawingName}」${drawing.tag ? ` [${drawing.tag}]` : ''}`,
+            label: `Excalidraw: 打开「${drawingName}」${drawing.tags?.length ? ` ${drawing.tags.map(t => '#' + t).join(' ')}` : ''}`,
           },
           // Use a simple function, not async, to avoid potential issues
           () => {
@@ -160,7 +160,7 @@ export function registerSlashCommands() {
 // Register block renderers
 export function registerBlockRenderers() {
   // Renderer for inline excalidraw drawings
-  logseq.App.onMacroRendererSlotted(async ({ slot, payload }) => {
+  logseq.App.onMacroRendererSlotted(async ({ slot, payload }: { slot: string, payload: any }) => {
     const [type, ...args] = payload.arguments
 
     if (type !== 'excalidraw') return
@@ -262,7 +262,7 @@ export function registerSearchService() {
  */
 export function setupSearchResultHandler() {
   // Listen for route changes to intercept excalidraw drawing navigation
-  logseq.App.onRouteChanged(async ({ path, template }) => {
+  logseq.App.onRouteChanged(async ({ path, template }: { path: string, template: string }) => {
     logger.debug('Route changed:', path, template)
 
     // Check if navigating to an excalidraw drawing from search
