@@ -4,7 +4,14 @@
 
 A premium, Apple-style Excalidraw integration for Logseq, designed for the future Database version. It stores drawings efficiently and provides a seamless, native experience.
 
-![Excalidraw DB Plugin](https://raw.githubusercontent.com/logseq/marketplace/master/plugins/logseq-excalidraw-db/screenshot.png)
+## 🖼️ Showcase
+
+### Dashboard
+![Dashboard](https://raw.githubusercontent.com/GeoffBao/logseq-excalidraw-db/main/screenshots/dashboard.png)
+
+### Editor
+![Editor](https://raw.githubusercontent.com/GeoffBao/logseq-excalidraw-db/main/screenshots/editor.png)
+
 
 ## ✨ Features
 
