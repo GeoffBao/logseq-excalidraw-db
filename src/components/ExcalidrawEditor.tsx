@@ -99,6 +99,7 @@ export function ExcalidrawEditor({
         isTagMenuOpen={isTagMenuOpen}
         setIsTagMenuOpen={setIsTagMenuOpen}
         isDirty={isDirty}
+        onClose={onClose}
       />
 
       <main className="flex-1 relative bg-white dark:bg-[#121212]">
@@ -155,23 +156,6 @@ export function ExcalidrawEditor({
           </div>
         )}
       </main>
-
-      {/* Floating Close Button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          logger.debug('[Excalidraw] Closing editor')
-          onClose()
-        }}
-        className="fixed top-2.5 right-4 z-[70] p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-dim)] transition-all active:scale-90"
-        title="Close"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      </button>
     </div>
   )
 }

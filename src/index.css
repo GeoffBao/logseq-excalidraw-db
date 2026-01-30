@@ -202,6 +202,99 @@
   margin-right: 16px !important;
 }
 
+/* Fix missing labels in "More Tools" and main menu */
+.excalidraw .dropdown-menu-item,
+.excalidraw .dropdown-menu-button,
+.excalidraw .dropdown-menu-item-base,
+.excalidraw .dropdown-menu-item-button,
+.excalidraw .dropdown-menu .dropdown-menu-item,
+.excalidraw .dropdown-menu .dropdown-menu-button,
+.excalidraw .popover button,
+.excalidraw .popover .dropdown-menu-item,
+.excalidraw .menu-item,
+.excalidraw .DropdownMenuItem,
+.excalidraw [class*="menu-item"],
+.excalidraw [class*="MenuItem"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  padding: 8px 16px !important;
+  color: var(--text-main) !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  background-color: transparent !important;
+}
+
+/* Force ALL children (spans, divs, labels) inside any menu item to be visible */
+.excalidraw .dropdown-menu-item *,
+.excalidraw .dropdown-menu-button *,
+.excalidraw .dropdown-menu-item-base *,
+.excalidraw .dropdown-menu-item-button *,
+.excalidraw .popover button *,
+.excalidraw .menu-item *,
+.excalidraw [class*="DropdownMenu"] *,
+.excalidraw [class*="menu-item"] *,
+.excalidraw [class*="MenuItem"] * {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-block !important;
+  color: inherit !important;
+  font-size: inherit !important;
+}
+
+/* Specific text targeting */
+.excalidraw .dropdown-menu-item__text,
+.excalidraw .dropdown-menu-button__text,
+.excalidraw .dropdown-menu-item-base__text,
+.excalidraw .dropdown-menu-item__label,
+.excalidraw .context-menu-item__label,
+.excalidraw .dropdown-menu-item-button__text,
+.excalidraw .menu-item__label,
+.excalidraw [class*="MenuItem__Label"],
+.excalidraw [class*="dropdown-menu-item__span"],
+.excalidraw [class*="DropdownMenuItem__Content"],
+.excalidraw [class*="MenuItem__Content"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  flex: 1 !important;
+  text-align: left !important;
+  margin-left: 8px !important;
+  font-size: 14px !important;
+  font-family: var(--font-system) !important;
+  min-width: 120px !important;
+  /* Increased min-width */
+  color: var(--text-main) !important;
+}
+
+/* Ensure icons have proper spacing and size */
+.excalidraw .dropdown-menu-item__icon,
+.excalidraw .dropdown-menu-button__icon,
+.excalidraw .dropdown-menu-item-base__icon,
+.excalidraw .dropdown-menu-item-button__icon,
+.excalidraw .dropdown-menu-item svg,
+.excalidraw .dropdown-menu-button svg,
+.excalidraw .menu-item svg,
+.excalidraw [class*="MenuItem__Icon"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Fix for specific "More Tools" popover items */
+.excalidraw .Stack.Stack_vertical.Stack_gap_1 {
+  width: auto !important;
+  min-width: 260px !important;
+  overflow: visible !important;
+}
+
 /* Properties panel / Selected element actions - CRITICAL */
 .excalidraw .App-menu_bottom,
 .excalidraw .App-bottom-bar,
@@ -272,17 +365,84 @@
   background: rgba(128, 128, 128, 0.5);
 }
 
-/* Animation */
+/* Animations & Transitions */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-subtle {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-in {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: forwards;
+}
+
+.fade-in {
+  animation-name: fadeIn;
+}
+
+.zoom-in-90 {
+  animation-name: zoomIn;
+  transform: scale(0.9);
+}
+
+.zoom-in-95 {
+  animation-name: zoomIn;
+  transform: scale(0.95);
+}
+
+.zoom-in-50 {
+  animation-name: zoomIn;
+  transform: scale(0.5);
+}
+
+.slide-in-from-right-2 {
+  animation-name: slideInFromRight;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-fadeIn {
