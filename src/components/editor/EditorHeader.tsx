@@ -17,8 +17,14 @@ interface EditorHeaderProps {
     onUpdateTags: (tags: string[]) => void
     isTagMenuOpen: boolean
     setIsTagMenuOpen: (isOpen: boolean) => void
-    isDirty?: boolean
+    isDirty: boolean
     onClose: () => void
+
+    // New Props for Obsidian Parity
+    zenModeEnabled: boolean
+    onZenModeChange: (enabled: boolean) => void
+    gridModeEnabled: boolean
+    onGridModeChange: (enabled: boolean) => void
 }
 
 export function EditorHeader({
@@ -37,11 +43,18 @@ export function EditorHeader({
     isTagMenuOpen,
     setIsTagMenuOpen,
     isDirty,
-    onClose
+    onClose,
+    zenModeEnabled,
+    onZenModeChange,
+    gridModeEnabled,
+    onGridModeChange
 }: EditorHeaderProps) {
 
     return (
-        <header className="flex flex-col border-b border-black/[0.05] dark:border-white/[0.05] bg-[var(--bg-app)]/80 backdrop-blur-xl z-[99999] shadow-sm pointer-events-auto">
+        <header className={cn(
+            "flex flex-col border-b border-black/[0.05] dark:border-white/[0.05] bg-[var(--bg-app)]/80 backdrop-blur-xl z-[99999] shadow-sm pointer-events-auto transition-all duration-300",
+            zenModeEnabled && "opacity-0 hover:opacity-100 -translate-y-full hover:translate-y-0"
+        )}>
             {/* Top row: Navigation & Info - PL-24 (96px) to avoid traffic lights */}
             <div className="flex items-center justify-between px-4 h-11 border-b border-black/[0.03] dark:border-white/[0.03]">
                 <div className="flex items-center gap-2 pl-24">
@@ -102,6 +115,45 @@ export function EditorHeader({
                             isOpen={isTagMenuOpen}
                             onClose={() => setIsTagMenuOpen(false)}
                         />
+                    </div>
+
+                    <div className="w-px h-5 bg-black/5 dark:bg-white/10 mx-1" />
+
+                    {/* View Controls (Zen & Grid) */}
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => onGridModeChange(!gridModeEnabled)}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all active:scale-95 pointer-events-auto",
+                                gridModeEnabled
+                                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                                    : "text-[var(--text-dim)] hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--text-main)]"
+                            )}
+                            title={gridModeEnabled ? "Disable Grid" : "Enable Grid"}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                <line x1="3" y1="9" x2="21" y2="9" />
+                                <line x1="3" y1="15" x2="21" y2="15" />
+                                <line x1="9" y1="3" x2="9" y2="21" />
+                                <line x1="15" y1="3" x2="15" y2="21" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => onZenModeChange(!zenModeEnabled)}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all active:scale-95 pointer-events-auto",
+                                zenModeEnabled
+                                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                                    : "text-[var(--text-dim)] hover:bg-black/5 dark:hover:bg-white/10 hover:text-[var(--text-main)]"
+                            )}
+                            title={zenModeEnabled ? "Exit Zen Mode" : "Enter Zen Mode"}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
                     </div>
 
                     <div className="w-px h-5 bg-black/5 dark:bg-white/10 mx-1" />

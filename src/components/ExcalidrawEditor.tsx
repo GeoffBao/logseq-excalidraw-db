@@ -7,6 +7,17 @@ import { logger } from '../lib/logger'
 import { copyDrawingReference, insertDrawingToToday } from '../lib/plugin'
 import type { ExcalidrawEditorProps } from '../types'
 import { EditorHeader } from './editor/EditorHeader'
+import { TagEditorPopover } from './editor/TagEditorPopover'
+
+// ========================================
+// FONT REGISTRATION (JavaScript FontFace API)
+// Excalidraw renders on Canvas, which IGNORES CSS @font-face.
+// We MUST register fonts via JavaScript for Canvas to use them.
+// ========================================
+// Use local fonts (downloaded to public/fonts) to avoid CDN/CORS issues
+// Note: In Vite, files in public/ are served at root path
+const VIRGIL_LOCAL_URL = '/fonts/Virgil.woff2';
+const XIAOLAI_LOCAL_URL = '/fonts/Xiaolai.woff2';
 
 export function ExcalidrawEditor({
   drawing,
@@ -21,12 +32,67 @@ export function ExcalidrawEditor({
   const [isSaving, setIsSaving] = useState(false)
   const [isJustSaved, setIsJustSaved] = useState(false)
   const [isTagMenuOpen, setIsTagMenuOpen] = useState(false)
+  const [fontsLoaded, setFontsLoaded] = useState(false) // BLOCKING STATE
+
+  // Canvas State
+  const [zenModeEnabled, setZenModeEnabled] = useState(false)
+  const [gridModeEnabled, setGridModeEnabled] = useState(false)
+
   const tagsRef = useRef<string[]>(currentTags)
 
   // Update tagsRef when currentTags change
   useEffect(() => {
     tagsRef.current = currentTags
   }, [currentTags])
+
+  // Register fonts via JavaScript FontFace API (Blocking)
+  useEffect(() => {
+    async function loadFonts() {
+      try {
+        const fontsToLoad: Promise<FontFace>[] = [];
+
+        // 1. Virgil (Latin)
+        const virgil = new FontFace('Virgil', `url(${VIRGIL_LOCAL_URL})`, {
+          style: 'normal',
+          weight: '400',
+          unicodeRange: 'U+0000-00FF, U+0100-017F, U+2000-206F'
+        });
+        fontsToLoad.push(virgil.load());
+
+        // 2. Xiaolai (CJK)
+        const xiaolai = new FontFace('Virgil', `url(${XIAOLAI_LOCAL_URL})`, {
+          style: 'normal',
+          weight: '400',
+          unicodeRange: 'U+3000-30FF, U+4E00-9FFF, U+FF00-FFEF'
+        });
+        fontsToLoad.push(xiaolai.load());
+
+        const loadedFonts = await Promise.all(fontsToLoad);
+        loadedFonts.forEach(font => document.fonts.add(font));
+
+        // Wait for document to confirm availability
+        await document.fonts.ready;
+
+        logger.info('[Font] Fonts registered locally. Unblocking UI.');
+        setFontsLoaded(true);
+      } catch (error) {
+        logger.error('[Font] Failed to load local fonts:', error);
+        // Even if failed, unblock so user can see something (fallback)
+        setFontsLoaded(true);
+      }
+    }
+    loadFonts();
+  }, []);
+
+  // Block rendering until fonts are ready to prevent "Canvas Race Condition"
+  if (!fontsLoaded) {
+    return (
+      <div className="flex items-center justify-center h-screen w-full bg-white dark:bg-zinc-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white" />
+      </div>
+    );
+  }
+
 
   const {
     setExcalidrawAPI,
@@ -100,6 +166,11 @@ export function ExcalidrawEditor({
         setIsTagMenuOpen={setIsTagMenuOpen}
         isDirty={isDirty}
         onClose={onClose}
+        // New Props
+        zenModeEnabled={zenModeEnabled}
+        onZenModeChange={setZenModeEnabled}
+        gridModeEnabled={gridModeEnabled}
+        onGridModeChange={setGridModeEnabled}
       />
 
       <main className="flex-1 relative bg-white dark:bg-[#121212]">
@@ -114,8 +185,8 @@ export function ExcalidrawEditor({
             theme={theme}
             langCode="en"
             viewModeEnabled={mode === 'preview'}
-            zenModeEnabled={false}
-            gridModeEnabled={false}
+            zenModeEnabled={zenModeEnabled}
+            gridModeEnabled={gridModeEnabled}
             UIOptions={{
               canvasActions: {
                 changeViewBackgroundColor: true,

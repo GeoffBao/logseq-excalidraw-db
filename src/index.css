@@ -1,51 +1,75 @@
-@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ========================================
-   Chinese Handwritten Font Support (Stable)
-   Strategy: CSS-based override ensuring ZCOOL KuaiLe takes precedence
-   for Virgil font family, backed by specificity.
+   Chinese Handwritten Font Support
+   Strategy: Strict Composite Font (Virgil for Latin, Xiaolai for CJK)
+   We use "Virgil" as the single family name, but split it by unicode-range.
    ======================================== */
 
-/* Load ZCOOL KuaiLe */
-@font-face {
-  font-family: 'ZCOOL KuaiLe';
-  src: url('https://fonts.gstatic.com/s/zcoolkuaile/v19/tssqApdaRQokwFjFJjvM6h2Wpg.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: block;
-  /* Important: wait for font to ensure no layout shift or fallback flicker */
-}
-
-/* 
-  CRITICAL: Override Excalidraw's internal "Virgil" font definition.
-  We redefine "Virgil" to use our Chinese font file. 
-  This tricks Excalidraw into rendering Chinese characters with the hand-drawn style
-  while keeping its internal logic references to "Virgil" intact.
-*/
+/* 1. Official Virgil Font (Latin Only)
+   Source: Excalidraw's official repository via CDN */
 @font-face {
   font-family: 'Virgil';
-  /* Use Ma Shan Zheng for handwriting style */
-  src: url('https://fonts.gstatic.com/s/mashanzheng/v11/L0xSDF02iNQ7H8L3hV_dfL67_6p00Hw.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/gh/excalidraw/virgil@main/Virgil.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
-  font-display: block;
+  font-display: swap;
+  /* Strictly Latin ranges */
+  unicode-range: U+0000-00FF, U+0100-017F, U+2000-206F, U+2070-209F, U+20A0-20CF, U+2100-218F, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* Force override for Virgil font to support Chinese characters */
+/* 2. Xiaolai Font (CJK Only)
+   Source: Chinese-fonts package via CDN */
+@font-face {
+  font-family: 'Virgil';
+  src: url('https://cdn.jsdelivr.net/npm/@chinese-fonts/xiaolai@3.0.0/dist/Xiaolai/result.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  /* CJK ranges only. Avoids Latin overlap. */
+  unicode-range: U+3000-30FF, U+31F0-31FF, U+4E00-9FFF, U+FF00-FFEF;
+}
+
+/* 3. Apply the Composite Font
+   CRITICAL: Do NOT list 'Xiaolai' or other fonts here. 
+   We want to force the browser to use our composite 'Virgil'. */
 .excalidraw .virgil,
 .excalidraw [style*="Virgil"] {
-  font-family: 'Virgil', 'Ma Shan Zheng', cursive !important;
+  font-family: 'Virgil', cursive !important;
 }
 
 /* Force override for inputs and textareas */
 .excalidraw textarea,
 .excalidraw input,
 .excalidraw .virgil {
-  font-family: 'ZCOOL KuaiLe', 'Virgil', cursive !important;
+  font-family: 'Virgil', cursive !important;
+}
+
+/* ========================================
+   Layout & UI Fixes
+   ======================================== */
+
+/* FIX: Remove gap between custom header and Excalidraw toolbar */
+/* The default Excalidraw top bar takes specific height even if empty/hidden */
+.excalidraw .App-top-bar {
+  display: none !important;
+  height: 0 !important;
+}
+
+/* Ensure the layer UI is properly positioned */
+.excalidraw .layer-ui__wrapper {
+  top: 0 !important;
+  padding-top: 10px !important;
+  /* Give a tiny bit of breathing room for the toolbar */
+}
+
+/* Remove any default body margins if affecting layout */
+body.excalidraw-app {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 /* ========================================
@@ -161,6 +185,20 @@
 .excalidraw-editor-container .excalidraw {
   position: absolute;
   inset: 0;
+  background-color: transparent !important;
+}
+
+/* Canvas Transparency for Obsidian-like feel */
+.excalidraw .excalidraw__canvas {
+  background-color: transparent !important;
+  /* Let container bg show through */
+}
+
+/* Remove default Excalidraw borders/shadows that might clash */
+.excalidraw .App-menu_top .buttonList,
+.excalidraw .layer-ui__wrapper {
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* CRITICAL: Ensure all Excalidraw UI layers work properly */
